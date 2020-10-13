@@ -30,44 +30,7 @@ function check_binary () {
 }
 
 function download {
-  param($file)
-  Write-Host "Downloading bin/fzf ..."
-  if ("$version" -ne "alpha") {
-    if (Test-Path "$fzf_base\bin\fzf.exe") {
-      Write-Host "  - Already exists"
-      if (check_binary) {
-        return
-      }
-    }
-  }
-  if (-not (Test-Path "$fzf_base\bin")) {
-    md "$fzf_base\bin"
-  }
-  if (-not $?) {
-    $binary_error="Failed to create bin directory"
-    return
-  }
-  cd "$fzf_base\bin"
-  if ("$version" -eq "alpha") {
-    $url="https://github.com/junegunn/fzf-bin/releases/download/alpha/$file"
-  } else {
-    $url="https://github.com/junegunn/fzf-bin/releases/download/$version/$file"
-  }
-  $temp=$env:TMP + "\fzf.zip"
-  [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-  (New-Object Net.WebClient).DownloadFile($url, $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath("$temp"))
-  if ($?) {
-    (Microsoft.PowerShell.Archive\Expand-Archive -Path $temp -DestinationPath .); (Remove-Item $temp)
-  } else {
-    $binary_error="Failed to download with powershell"
-  }
-  if (-not (Test-Path fzf.exe)) {
-    $binary_error="Failed to download $file"
-    return
-  }
-  check_binary >$null
+  return 1
 }
 
-download "fzf-$version-windows_$binary_arch.zip"
-
-Write-Host 'For more information, see: https://github.com/junegunn/fzf'
+Write-Host 'For more information, see: https://github.com/stoptracking-vim/fzf'
