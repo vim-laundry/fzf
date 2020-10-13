@@ -1,13 +1,6 @@
-<img src="https://raw.githubusercontent.com/junegunn/i/master/fzf.png" height="170" alt="fzf - a command-line fuzzy finder"> [![travis-ci](https://travis-ci.org/junegunn/fzf.svg?branch=master)](https://travis-ci.org/junegunn/fzf)
+This is fork. Automagical download of `fzf` binary is disabled.
+
 ===
-
-fzf is a general-purpose command-line fuzzy finder.
-
-<img src="https://raw.githubusercontent.com/junegunn/i/master/fzf-preview.png" width=640>
-
-It's an interactive Unix filter for command-line that can be used with any
-list; files, command history, processes, hostnames, bookmarks, git commits,
-etc.
 
 Pros
 ----
