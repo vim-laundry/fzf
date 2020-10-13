@@ -1,5 +1,7 @@
-This is fork. Automagical download of `fzf` binary is disabled.
-===
+Automagical downloads from GitHub are disabled.
+---
+
+-----
 
 Pros
 ----
