@@ -133,25 +133,7 @@ function! s:default_layout()
 endfunction
 
 function! fzf#install()
-  if s:is_win && !has('win32unix')
-    let script = s:base_dir.'/install.ps1'
-    if !filereadable(script)
-      throw script.' not found'
-    endif
-    let script = 'powershell -ExecutionPolicy Bypass -file ' . script
-  else
-    let script = s:base_dir.'/install'
-    if !executable(script)
-      throw script.' not found'
-    endif
-    let script .= ' --bin'
-  endif
-
-  call s:warn('Running fzf installer ...')
-  call system(script)
-  if v:shell_error
-    throw 'Failed to download fzf: '.script
-  endif
+  call s:warn('Not running fzf installer.')
 endfunction
 
 function! fzf#exec()
@@ -160,7 +142,7 @@ function! fzf#exec()
       let s:exec = s:fzf_go
     elseif executable('fzf')
       let s:exec = 'fzf'
-    elseif input('fzf executable not found. Download binary? (y/n) ') =~? '^y'
+    call s:warn('fzf executable not found. Binary download is disabled in this fork ')
       redraw
       call fzf#install()
       return fzf#exec()
