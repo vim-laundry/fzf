@@ -1,5 +1,4 @@
 This is fork. Automagical download of `fzf` binary is disabled.
-
 ===
 
 Pros
