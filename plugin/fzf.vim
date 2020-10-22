@@ -132,19 +132,13 @@ function! s:default_layout()
         \ : { 'down': '~40%' }
 endfunction
 
-function! fzf#install()
-  call s:warn('Not running fzf installer.')
-endfunction
-
 function! fzf#exec()
   if !exists('s:exec')
     if executable(s:fzf_go)
       let s:exec = s:fzf_go
     elseif executable('fzf')
       let s:exec = 'fzf'
-    call s:warn('fzf executable not found. Binary download is disabled in this fork ')
       redraw
-      call fzf#install()
       return fzf#exec()
     else
       redraw
