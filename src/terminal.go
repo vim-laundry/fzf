@@ -27,6 +27,7 @@ var numericPrefix *regexp.Regexp
 var activeTempFiles []string
 
 const ellipsis string = ".."
+const clearCode string = "\x1b[2J"
 
 func init() {
 	placeholder = regexp.MustCompile(`\\?(?:{[+sf]*[0-9,-.]*}|{q}|{\+?f?nf?})`)
@@ -1722,7 +1723,64 @@ func (t *Terminal) Loop() {
 					cmd.Stderr = &out
 					err := cmd.Start()
 					if err != nil {
-						out.Write([]byte(err.Error()))
+						t.reqBox.Set(reqPreviewDisplay, previewResult{version, []string{err.Error()}, 0, ""})
+					} else {
+						reaps = 2
+						lineChan := make(chan eachLine)
+						// Goroutine 1 reads process output
+						go func() {
+							for {
+								line, err := reader.ReadString('\n')
+								lineChan <- eachLine{line, err}
+								if err != nil {
+									break
+								}
+							}
+							eofChan <- true
+						}()
+						// Goroutine 2 periodically requests rendering
+						go func(version int) {
+							lines := []string{}
+							spinner := makeSpinner(t.unicode)
+							spinnerIndex := -1 // Delay initial rendering by an extra tick
+							ticker := time.NewTicker(previewChunkDelay)
+							offset := initialOffset
+						Loop:
+							for {
+								select {
+								case <-ticker.C:
+									if len(lines) > 0 && len(lines) >= initialOffset {
+										if spinnerIndex >= 0 {
+											spin := spinner[spinnerIndex%len(spinner)]
+											t.reqBox.Set(reqPreviewDisplay, previewResult{version, lines, offset, spin})
+											offset = -1
+										}
+										spinnerIndex++
+									}
+								case eachLine := <-lineChan:
+									line := eachLine.line
+									err := eachLine.err
+									if len(line) > 0 {
+										clearIndex := strings.Index(line, clearCode)
+										if clearIndex >= 0 {
+											lines = []string{}
+											line = line[clearIndex+len(clearCode):]
+											version--
+											offset = 0
+										}
+										lines = append(lines, line)
+									}
+									if err != nil {
+										if len(lines) > 0 {
+											t.reqBox.Set(reqPreviewDisplay, previewResult{version, lines, offset, ""})
+										}
+										break Loop
+									}
+								}
+							}
+							ticker.Stop()
+							reapChan <- true
+						}(version)
 					}
 					finishChan := make(chan bool, 1)
 					updateChan := make(chan bool)
