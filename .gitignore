@@ -1,3 +1,5 @@
+src/*
+bin/*
 target
 pkg
 Gemfile.lock
