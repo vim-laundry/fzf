@@ -2,11 +2,10 @@
 
 set -u
 
-version=0.23.1
+version=0.27.2
 auto_completion=
 key_bindings=
 update_config=2
-binary_arch=
 shells="bash zsh fish"
 prefix='~/.fzf'
 prefix_expand=~/.fzf

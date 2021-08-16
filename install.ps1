@@ -1,10 +1,4 @@
-$version="0.23.1"
-
-if ([Environment]::Is64BitProcess) {
-  $binary_arch="amd64"
-} else {
-  $binary_arch="386"
-}
+$version="0.27.2"
 
 $fzf_base=Split-Path -Parent $MyInvocation.MyCommand.Definition
 
