@@ -132,17 +132,6 @@ function! s:default_layout()
         \ : { 'down': '~40%' }
 endfunction
 
-function! fzf#install()
-  if s:is_win && !has('win32unix')
-    throw 'Automatic installation is disabled.'
-  else
-    throw 'Automatic installation is disabled.'
-  endif
-  if v:shell_error
-    throw 'Failed to download fzf: '
-  endif
-endfunction
-
 let s:versions = {}
 function s:get_version(bin)
   if has_key(s:versions, a:bin)
@@ -182,6 +171,10 @@ function! fzf#exec(...)
     call add(binaries, 'fzf')
 
     if empty(binaries)
+      if input('fzf executable not found.') =~? '^y'
+        redraw
+        return fzf#exec()
+      else
         redraw
         throw 'fzf executable not found'
       endif
