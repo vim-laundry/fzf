@@ -132,22 +132,12 @@ function! s:default_layout()
         \ : { 'down': '~40%' }
 endfunction
 
-function! fzf#exec()
-  if !exists('s:exec')
-    let binaries = []
-    if executable('fzf')
-      call add(binaries, 'fzf')
-    endif
-    if executable(s:fzf_go)
-      let s:exec = s:fzf_go
-    elseif executable('fzf')
-      let s:exec = 'fzf'
-      redraw
-      return fzf#exec()
-    else
-      throw printf('You need to upgrade fzf (required: %s or above)', a:1)
-    endif
-  endif
+function! fzf#exec(...)
+  let binaries = []
+  call add(binaries, 'fzf')
+  let s:exec = 'fzf'
+  redraw
+  return fzf#exec()
 
   return s:exec
 endfunction
