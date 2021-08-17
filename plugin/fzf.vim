@@ -132,12 +132,86 @@ function! s:default_layout()
         \ : { 'down': '~40%' }
 endfunction
 
+function! fzf#install()
+  if s:is_win && !has('win32unix')
+    throw 'Automatic installation is disabled.'
+  else
+    throw 'Automatic installation is disabled.'
+  endif
+  if v:shell_error
+    throw 'Failed to download fzf: '
+  endif
+endfunction
+
+let s:versions = {}
+function s:get_version(bin)
+  if has_key(s:versions, a:bin)
+    return s:versions[a:bin]
+  end
+  let command = a:bin . ' --version'
+  let output = systemlist(command)
+  if v:shell_error || empty(output)
+    return ''
+  endif
+  let ver = matchstr(output[-1], '[0-9.]\+')
+  let s:versions[a:bin] = ver
+  return ver
+endfunction
+
+function! s:compare_versions(a, b)
+  let a = split(a:a, '\.')
+  let b = split(a:b, '\.')
+  for idx in range(0, max([len(a), len(b)]) - 1)
+    let v1 = str2nr(get(a, idx, 0))
+    let v2 = str2nr(get(b, idx, 0))
+    if     v1 < v2 | return -1
+    elseif v1 > v2 | return 1
+    endif
+  endfor
+  return 0
+endfunction
+
+function! s:compare_binary_versions(a, b)
+  return s:compare_versions(s:get_version(a:a), s:get_version(a:b))
+endfunction
+
+let s:checked = {}
 function! fzf#exec(...)
-  let binaries = []
-  call add(binaries, 'fzf')
-  let s:exec = 'fzf'
-  redraw
-  return fzf#exec()
+  if !exists('s:exec')
+    let binaries = []
+    call add(binaries, 'fzf')
+
+    if empty(binaries)
+        redraw
+        throw 'fzf executable not found'
+      endif
+    elseif len(binaries) > 1
+      call sort(binaries, 's:compare_binary_versions')
+    endif
+
+    let s:exec = binaries[-1]
+  endif
+
+  if a:0 && !has_key(s:checked, a:1)
+    let fzf_version = s:get_version(s:exec)
+    if empty(fzf_version)
+      let message = printf('Failed to run "%s --version"', s:exec)
+      unlet s:exec
+      throw message
+    end
+
+    if s:compare_versions(fzf_version, a:1) >= 0
+      let s:checked[a:1] = 1
+      return s:exec
+    elseif a:0 < 2 && input(printf('You need fzf %s or above. Found: %s.', a:1, fzf_version)) =~? '^y'
+      let s:versions = {}
+      unlet s:exec
+      redraw
+      return fzf#exec(a:1, 1)
+    else
+      throw printf('You need to upgrade fzf (required: %s or above)', a:1)
+    endif
+  endif
 
   return s:exec
 endfunction
